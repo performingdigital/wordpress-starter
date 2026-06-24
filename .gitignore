@@ -40,3 +40,4 @@
 # Build/runtime noise
 /storage/backups/
 public/dist
+public/hot

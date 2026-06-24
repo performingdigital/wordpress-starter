@@ -2,19 +2,13 @@
 
 namespace App\Providers;
 
-class ViteServiceProvider
+final class ViteServiceProvider
 {
     protected array $config = [];
 
     public function boot(): void
     {
-        $config = config('vite', []);
-
-        if (!is_array($config) || ($config['enabled'] ?? false) !== true) {
-            return;
-        }
-
-        $this->config = $config;
+        $this->config = config('vite');
 
         add_action(
             'wp_head',
@@ -29,100 +23,114 @@ class ViteServiceProvider
         );
     }
 
-    public function preload(): string
+    protected function preload(): string
     {
-        if ($this->config['useDevServer'] ?? false) {
+        if ($this->config['useDevServer']) {
             return '';
         }
 
         $manifest = $this->manifest();
-        $chunk = $manifest[$this->config['entry']] ?? null;
-
-        if (!$chunk) {
-            return '';
-        }
-
+        $chunk = $manifest[$this->config['entry']];
         $tags = [];
 
         foreach ($chunk['imports'] ?? [] as $import) {
-            $file = $manifest[$import]['file'] ?? null;
-
-            if ($file) {
-                $tags[] = $this->makePreloadTag($this->buildUrl($file));
+            foreach ($manifest[$import]['file'] ?? [] as $file) {
+                if ($file) {
+                    $url = $this->buildUrl($file);
+                    $tags[] = $this->makePreloadTag($url);
+                }
             }
         }
 
         return implode('', $tags);
     }
 
-    public function scripts(): string
+    protected function scripts(): string
     {
-        if ($this->config['useDevServer'] ?? false) {
-            return implode('', [
-                $this->makeScriptTag(rtrim($this->config['devServer'], '/') . '/@vite/client'),
-                $this->makeScriptTag(rtrim($this->config['devServer'], '/') . '/' . ltrim($this->config['entry'], '/')),
-            ]);
+        $tags = [];
+
+        if ($this->config['useDevServer']) {
+            $tags[] = $this->makeScriptTag('http://localhost:5173/@vite/client');
+            $tags[] = $this->makeScriptTag('http://localhost:5173/' . $this->config['entry']);
+        } else {
+            $manifest = collect($this->manifest());
+            if ($manifest->has($this->config['entry']) && collect($manifest[$this->config['entry']])->has('file')) {
+                $url = $this->buildUrl($this->manifest()[$this->config['entry']]['file']);
+                $tags[] = $this->makeScriptTag($url);
+            }
         }
 
-        $file = $this->manifest()[$this->config['entry']]['file'] ?? null;
-
-        return $file ? $this->makeScriptTag($this->buildUrl($file)) : '';
+        return implode('', $tags);
     }
 
-    public function styles(): string
+    protected function styles(): string
     {
-        if ($this->config['useDevServer'] ?? false) {
+        if ($this->config['useDevServer']) {
             return '';
         }
 
-        return implode('', array_map(
-            fn (string $url) => $this->makeStyleTag($url),
-            $this->getStylesUrls(),
-        ));
-    }
+        $tags = [];
 
-    public function getStylesUrls(): array
-    {
-        $chunk = $this->manifest()[$this->config['entry']] ?? null;
-
-        if (!$chunk) {
-            return [];
+        foreach ($this->getStylesUrls() as $url) {
+            $tags[] = $this->makeStyleTag($url);
         }
 
-        return array_map(
-            fn (string $css) => $this->buildUrl($css),
-            $chunk['css'] ?? [],
-        );
+        return implode('', $tags);
     }
 
-    protected function makeScriptTag(?string $url = null): string
+    protected function getStylesUrls()
     {
-        return $url ? "<script type='module' crossorigin src='{$url}'></script>" : '';
+        $manifest = $this->manifest();
+        $chunk = $manifest[$this->config['entry']];
+        $urls = [];
+
+        foreach ($chunk['css'] ?? [] as $css) {
+            if ($css) {
+                $urls[] = $this->buildUrl($css);
+            }
+        }
+
+        return $urls;
     }
 
-    protected function makePreloadTag(?string $url = null): string
+    protected function makeScriptTag(string $url = null)
     {
-        return $url ? "<link rel='modulepreload' href='{$url}'>" : '';
+        if (is_null($url)) {
+            return '';
+        }
+
+        return "<script type='module' crossorigin src='" . $url . "'></script>";
     }
 
-    protected function makeStyleTag(?string $url = null): string
+    protected function makePreloadTag(string $url = null)
     {
-        return $url ? "<link rel='stylesheet' href='{$url}'>" : '';
+        if (is_null($url)) {
+            return '';
+        }
+
+        return "<link rel='modulepreload' href='" . $url . "'>";
+    }
+
+    protected function makeStyleTag(string $url = null)
+    {
+        if (is_null($url)) {
+            return '';
+        }
+
+        return "<link rel='stylesheet' href='" . $url . "'>";
     }
 
     protected function buildUrl(string $file): string
     {
-        return rtrim((string) env('WP_HOME'), '/') . '/' . trim($this->config['build'], '/') . '/' . ltrim($file, '/');
+        return get_template_directory_uri() . '/../' . $this->config['build'] . $file;
     }
 
-    protected function manifest(): array
+    protected function manifest(): ?array
     {
-        $path = $this->config['manifestPath'] ?? null;
-
-        if (!$path || !file_exists($path)) {
-            return [];
+        try {
+            return json_decode(json: file_get_contents($this->config['manifestPath']), associative: true);
+        } catch (\Throwable $e) {
+            throw new \Exception('manifest.json not found');
         }
-
-        return json_decode((string) file_get_contents($path), true) ?: [];
     }
 }
