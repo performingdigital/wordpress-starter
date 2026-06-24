@@ -6,8 +6,10 @@
     {{ fn('wp_head') }}
   </head>
   <body>
-    <h1>Hello, World!</h1>
-
-    <x-button> Click me! </x-button>
+    <main class="w-full max-w-7xl mx-auto">
+      <div>
+        {{ post.content }}
+      </div>
+    </main>
   </body>
 </html>
