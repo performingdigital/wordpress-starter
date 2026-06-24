@@ -33,6 +33,20 @@ pnpm build
 - `templates/` — Timber templates.
 - `routes/web.php` — Timber template routing.
 
+## Twig components
+
+This project uses `performing/twig-components` with custom tag syntax.
+
+- Components live in `templates/_components/`
+- Use them as `<x-name>` / `<x-folder.name>`
+- Configuration lives in `App\StarterSite::add_to_twig()`
+
+Example:
+
+```twig
+<x-button class="button">Click me</x-button>
+```
+
 ## Composer notes
 
 WordPress core is installed to `public/wordpress`, while Composer-installed WordPress plugins/themes are installed to `public/content`.
