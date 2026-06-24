@@ -122,7 +122,7 @@ final class ViteServiceProvider
 
     protected function buildUrl(string $file): string
     {
-        return get_template_directory_uri() . '/../' . $this->config['build'] . $file;
+        return '/dist/' . $file;
     }
 
     protected function manifest(): ?array
