@@ -17,8 +17,6 @@ final class BlocksServiceProvider
             $block['render_callback'] = fn ($attributes) => $this->render($key, $attributes);
             register_block_type('starter/'.$key, $block);
         }
-
-        register_block_type(ROOT_DIR . '/blocks/php-only');
     }
 
     protected function render(string $key, array $attributes)
