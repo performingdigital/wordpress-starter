@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="{{ site.language ?: 'en' }}">
+  <head>
+    <meta charset="{{ fn('bloginfo', 'charset') }}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {{ fn('wp_head') }}
+  </head>
+  <body {{ fn('body_class') }}>
+    {% include 'partials/header.twig' %}
+
+    <main class="w-full max-w-7xl mx-auto">
+      {% block content %}{% endblock %}
+    </main>
+
+    {% include 'partials/footer.twig' %}
+
+    {{ fn('wp_footer') }}
+  </body>
+</html>

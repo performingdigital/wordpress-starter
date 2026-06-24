@@ -4,11 +4,25 @@ use Timber\Timber;
 
 $context = Timber::context();
 
+if (app()->bound('starter.plugin_template')) {
+    app()->instance('starter.capturing_plugin_template', true);
+
+    ob_start();
+    include app('starter.plugin_template');
+    $context['content'] = ob_get_clean();
+
+    app()->forgetInstance('starter.capturing_plugin_template');
+
+    Timber::render('plugin.twig', $context);
+    return;
+}
+
 if (is_singular()) {
     $context['post'] = Timber::get_post();
 }
 
 $template = match (true) {
+    is_woocommerce() => 'woocommerce.twig',
     is_front_page() => 'front-page.twig',
     is_home() => 'home.twig',
     is_page() => 'page.twig',
@@ -19,10 +33,4 @@ $template = match (true) {
     default => 'index.twig',
 };
 
-Timber::render(
-    [
-        $template,
-        'index.twig',
-    ],
-    $context,
-);
+Timber::render([$template, 'index.twig'], $context);

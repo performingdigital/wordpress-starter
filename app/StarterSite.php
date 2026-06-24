@@ -34,6 +34,10 @@ class StarterSite extends Site
      */
     public function route(string $template): string
     {
+        if (str_starts_with($template, WP_PLUGIN_DIR)) {
+            app()->instance('starter.plugin_template', $template);
+        }
+
         return ROOT_DIR . '/routes/web.php';
     }
 
