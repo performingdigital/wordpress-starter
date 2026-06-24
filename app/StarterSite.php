@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App;
 
+use Performing\TwigComponents\Configuration;
 use Timber\Site;
 use Timber\Timber;
+use Twig\Environment;
 
 class StarterSite extends Site
 {
@@ -13,12 +15,12 @@ class StarterSite extends Site
     {
         foreach (include ROOT_DIR . '/bootstrap/providers.php' as $provider) {
             $provider = app($provider);
-
             method_exists($provider, 'register') && $provider->register();
             method_exists($provider, 'boot') && $provider->boot();
         }
 
         add_filter('timber/context', $this->add_to_context(...));
+        add_filter('timber/twig', $this->add_to_twig(...));
         add_filter('timber/twig/filters', $this->add_filters_to_twig(...));
         add_filter('timber/twig/functions', $this->add_functions_to_twig(...));
         add_filter('timber/twig/environment/options', $this->update_twig_environment_options(...));
@@ -27,10 +29,25 @@ class StarterSite extends Site
         parent::__construct();
     }
 
-
-    public function route($template)
+    /**
+     * Add custom wordpress routing
+     */
+    public function route(string $template): string
     {
         return ROOT_DIR . '/routes/web.php';
+    }
+
+    /**
+     * Configure the twig environment.
+     */
+    protected function add_to_twig(Environment $twig)
+    {
+        Configuration::make($twig)
+            ->setTemplatesPath('/_components')
+            ->useCustomTags()
+            ->setup();
+
+        return $twig;
     }
 
     /**

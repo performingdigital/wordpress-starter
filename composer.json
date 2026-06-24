@@ -18,7 +18,8 @@
         "timber/timber": "^2.5",
         "spatie/ignition": "^1.16",
         "wp-plugin/woocommerce": "^10.8",
-        "illuminate/container": "^13.17"
+        "illuminate/container": "^13.17",
+        "performing/twig-components": "^0.7.0"
     },
     "config": {
         "allow-plugins": {
