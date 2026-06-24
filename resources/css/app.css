@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@source "../../templates/**/*.twig";
+@source "../../modules/**/*.php";
+
+@theme inline {
+  /**  */
+}

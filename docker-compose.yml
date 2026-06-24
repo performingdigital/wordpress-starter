@@ -1,0 +1,55 @@
+services:
+  app:
+    image: ghcr.io/performingdigital/php-nginx:8.5
+    working_dir: /app
+    healthcheck:
+      disable: true
+    environment:
+      NGINX_WEBROOT: /app/public
+      PHP_DISPLAY_ERRORS: 1
+      # HEALTHCHECK_PATH: /up
+      PHP_OPCACHE_ENABLE: 0
+    volumes:
+      - ".:/app"
+    depends_on:
+      - mysql
+      - redis
+
+  mysql:
+    image: "mysql:8"
+    environment:
+      MYSQL_ROOT_PASSWORD: "secret"
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: "project"
+      MYSQL_USER: "project"
+      MYSQL_PASSWORD: "project"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    expose:
+      - "3306"
+    volumes:
+      - "./storage/backups:/root/backups"
+      - "data-mysql:/var/lib/mysql"
+    healthcheck:
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - "-p${DB_PASSWORD}"
+      retries: 3
+      timeout: 5s
+
+  redis:
+    image: "redis:alpine"
+    volumes:
+      - "data-redis:/data"
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      retries: 3
+      timeout: 5s
+
+volumes:
+  data-mysql:
+  data-redis:

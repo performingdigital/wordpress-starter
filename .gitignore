@@ -1,0 +1,42 @@
+# Environment
+.env
+
+# PHP / Composer dependencies
+/vendor/
+
+# Node dependencies
+/node_modules/
+
+# WordPress core installed by Composer. Do not put custom code here.
+/public/wordpress/
+
+# WordPress content lives outside core so core reinstalls cannot delete it.
+/public/content/*
+
+# Ignore Composer-installed / admin-installed plugins.
+!/public/content/plugins/
+/public/content/plugins/*
+
+# Commit MU plugins.
+!/public/content/mu-plugins/
+!/public/content/mu-plugins/**
+
+# Commit the custom project theme only.
+!/public/content/themes/
+/public/content/themes/*
+!/public/content/themes/starter/
+!/public/content/themes/starter/**
+
+# Runtime content.
+/public/content/uploads/
+/public/content/cache/
+/public/content/upgrade/
+/public/content/debug.log
+
+# Old/wrong Composer plugin install locations.
+/wp-content/
+/public/wordpress/wp-content/
+
+# Build/runtime noise
+/storage/backups/
+public/dist
