@@ -3,10 +3,14 @@
 define('ROOT_DIR', dirname(__DIR__));
 define('PUBLIC_DIR', ROOT_DIR . '/public');
 
+/** Fix permissions */
+define('FS_CHMOD_DIR', (0755 & ~ umask()));
+define('FS_CHMOD_FILE', (0644 & ~ umask()));
+
 /** Bootstrap the application container. */
 require_once ROOT_DIR . '/bootstrap/app.php';
 
-// Initialize Timber.
+/**  Initialize Timber. */
 Timber\Timber::init();
 Timber\Timber::$dirname = 'templates';
 Timber\Timber::$locations = [ROOT_DIR . '/templates'];
