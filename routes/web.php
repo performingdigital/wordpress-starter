@@ -22,6 +22,7 @@ if (is_singular()) {
 }
 
 $template = match (true) {
+    function_exists('is_account_page') && is_account_page() => 'woocommerce/my-account.twig',
     is_woocommerce() => 'woocommerce.twig',
     is_front_page() => 'front-page.twig',
     is_home() => 'home.twig',
